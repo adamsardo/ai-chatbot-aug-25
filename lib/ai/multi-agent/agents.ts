@@ -42,7 +42,7 @@ export const AVAILABLE_AGENTS: Agent[] = [
         id: 'document-management',
         name: 'Document Management',
         description: 'Create, update, and manage documents',
-        tools: ['createDocument', 'updateDocument'],
+        tools: ['createDocument', 'updateDocument', 'textToPdf'],
         expertise: ['writing', 'editing', 'documentation', 'content-creation']
       }
     ],
@@ -58,7 +58,7 @@ export const AVAILABLE_AGENTS: Agent[] = [
         id: 'information-gathering',
         name: 'Information Gathering',
         description: 'Gather and analyze information from various sources',
-        tools: ['getWeather'],
+        tools: ['getWeather', 'composioSearch'],
         expertise: ['research', 'analysis', 'data-gathering', 'fact-checking']
       }
     ],

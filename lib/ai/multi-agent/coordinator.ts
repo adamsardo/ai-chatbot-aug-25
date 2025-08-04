@@ -62,7 +62,7 @@ export class MultiAgentCoordinator {
     
     // Check for document-related keywords
     if (messageWords.some(word => 
-      ['document', 'write', 'edit', 'create', 'update', 'draft'].includes(word)
+      ['document', 'write', 'edit', 'create', 'update', 'draft', 'pdf', 'convert', 'export'].includes(word)
     ) && currentAgent.id !== 'document-specialist') {
       return {
         shouldHandoff: true,
@@ -86,7 +86,7 @@ export class MultiAgentCoordinator {
 
     // Check for research keywords
     if (messageWords.some(word => 
-      ['research', 'find', 'search', 'weather', 'data', 'information'].includes(word)
+      ['research', 'find', 'search', 'weather', 'data', 'information', 'web', 'scrape', 'google'].includes(word)
     ) && currentAgent.id !== 'research-agent') {
       return {
         shouldHandoff: true,

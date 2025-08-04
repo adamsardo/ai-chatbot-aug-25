@@ -88,7 +88,9 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.0",
-    "zod": "^3.25.68"
+    "zod": "^3.25.68",
+    "@composio/core": "^0.8.0",
+    "@composio/vercel": "^0.8.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -111,5 +113,22 @@
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.12.3",
+  "description": "<a href=\"https://chat.vercel.ai/\">   <img alt=\"Next.js 14 and App Router-ready AI chatbot.\" src=\"app/(chat)/opengraph-image.png\">   <h1 align=\"center\">Chat SDK</h1> </a>",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamsardo/ai-chatbot-aug-25.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adamsardo/ai-chatbot-aug-25/issues"
+  },
+  "homepage": "https://github.com/adamsardo/ai-chatbot-aug-25#readme"
 }
