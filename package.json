@@ -89,8 +89,8 @@
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.0",
     "zod": "^3.25.68",
-    "@composio/core": "^0.8.0",
-    "@composio/vercel": "^0.8.0"
+    "@composio/core": "^0.1.39",
+    "@composio/vercel": "^0.1.39"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
