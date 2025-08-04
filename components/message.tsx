@@ -16,9 +16,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
+import { MultiAgentReasoning } from './multi-agent-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import type { ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
+import { useAgentData } from '@/hooks/use-agent-data';
 
 // Type narrowing is handled by TypeScript's control flow analysis
 // The AI SDK provides proper discriminated unions for tool calls
@@ -49,6 +51,7 @@ const PurePreviewMessage = ({
   );
 
   useDataStream();
+  const { agentSteps, handoffs, currentAgent, hasAgentData } = useAgentData();
 
   return (
     <AnimatePresence>
@@ -104,13 +107,27 @@ const PurePreviewMessage = ({
               const key = `message-${message.id}-part-${index}`;
 
               if (type === 'reasoning' && part.text?.trim().length > 0) {
-                return (
-                  <MessageReasoning
-                    key={key}
-                    isLoading={isLoading}
-                    reasoning={part.text}
-                  />
-                );
+                // Use multi-agent reasoning if we have agent data, otherwise use standard reasoning
+                if (hasAgentData) {
+                  return (
+                    <MultiAgentReasoning
+                      key={key}
+                      isLoading={isLoading}
+                      reasoning={part.text}
+                      agentSteps={agentSteps}
+                      handoffs={handoffs}
+                      currentAgent={currentAgent}
+                    />
+                  );
+                } else {
+                  return (
+                    <MessageReasoning
+                      key={key}
+                      isLoading={isLoading}
+                      reasoning={part.text}
+                    />
+                  );
+                }
               }
 
               if (type === 'text') {

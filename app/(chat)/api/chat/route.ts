@@ -6,6 +6,7 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
+import { MultiAgentCoordinator } from '@/lib/ai/multi-agent/coordinator';
 import { auth, type UserType } from '@/app/(auth)/auth';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import {
@@ -151,43 +152,97 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
-        const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
-          messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(5),
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
-          experimental_transform: smoothStream({ chunking: 'word' }),
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
+        if (selectedChatModel === 'chat-model-reasoning') {
+          // Use multi-agent coordinator for reasoning model
+          const coordinator = new MultiAgentCoordinator(
+            (step) => {
+              // Send agent step updates to client
+              dataStream.writeDataPart({
+                type: 'agent-step',
+                value: step,
+              });
+            },
+            (handoff) => {
+              // Send handoff updates to client
+              dataStream.writeDataPart({
+                type: 'agent-handoff', 
+                value: handoff,
+              });
+            }
+          );
+
+          const userMessage = uiMessages[uiMessages.length - 1];
+          const userContent = userMessage.parts
+            .filter(part => part.type === 'text')
+            .map(part => part.text)
+            .join(' ');
+
+          const result = coordinator.processMessage(userContent, {
+            model: myProvider.languageModel(selectedChatModel),
+            system: systemPrompt({ selectedChatModel, requestHints }),
+            messages: convertToModelMessages(uiMessages),
+            tools: {
+              getWeather,
+              createDocument: createDocument({ session, dataStream }),
+              updateDocument: updateDocument({ session, dataStream }),
+              requestSuggestions: requestSuggestions({
+                session,
+                dataStream,
+              }),
+            },
+            experimental_activeTools: [
+              'getWeather',
+              'createDocument',
+              'updateDocument',
+              'requestSuggestions',
+            ],
+          });
+
+          result.then(streamResult => {
+            streamResult.consumeStream();
+            dataStream.merge(
+              streamResult.toUIMessageStream({
+                sendReasoning: true,
+              }),
+            );
+          });
+        } else {
+          // Use standard single-agent approach for regular chat
+          const result = streamText({
+            model: myProvider.languageModel(selectedChatModel),
+            system: systemPrompt({ selectedChatModel, requestHints }),
+            messages: convertToModelMessages(uiMessages),
+            stopWhen: stepCountIs(5),
+            experimental_activeTools: [
+              'getWeather',
+              'createDocument',
+              'updateDocument',
+              'requestSuggestions',
+            ],
+            experimental_transform: smoothStream({ chunking: 'word' }),
+            tools: {
+              getWeather,
+              createDocument: createDocument({ session, dataStream }),
+              updateDocument: updateDocument({ session, dataStream }),
+              requestSuggestions: requestSuggestions({
+                session,
+                dataStream,
+              }),
+            },
+            experimental_telemetry: {
+              isEnabled: isProductionEnvironment,
+              functionId: 'stream-text',
+            },
+          });
+
+          result.consumeStream();
+
+          dataStream.merge(
+            result.toUIMessageStream({
+              sendReasoning: selectedChatModel === 'chat-model-reasoning',
             }),
-          },
-          experimental_telemetry: {
-            isEnabled: isProductionEnvironment,
-            functionId: 'stream-text',
-          },
-        });
-
-        result.consumeStream();
-
-        dataStream.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          }),
-        );
+          );
+        }
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
