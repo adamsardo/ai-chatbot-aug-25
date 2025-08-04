@@ -24,6 +24,8 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { composioSearch } from '@/lib/ai/tools/composio-search';
+import { textToPdf } from '@/lib/ai/tools/text-to-pdf';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
@@ -183,6 +185,8 @@ export async function POST(request: Request) {
             messages: convertToModelMessages(uiMessages),
             tools: {
               getWeather,
+              composioSearch,
+              textToPdf,
               createDocument: createDocument({ session, dataStream }),
               updateDocument: updateDocument({ session, dataStream }),
               requestSuggestions: requestSuggestions({
@@ -192,6 +196,8 @@ export async function POST(request: Request) {
             },
             experimental_activeTools: [
               'getWeather',
+              'composioSearch',
+              'textToPdf',
               'createDocument',
               'updateDocument',
               'requestSuggestions',
@@ -215,6 +221,8 @@ export async function POST(request: Request) {
             stopWhen: stepCountIs(5),
             experimental_activeTools: [
               'getWeather',
+              'composioSearch',
+              'textToPdf',
               'createDocument',
               'updateDocument',
               'requestSuggestions',
@@ -222,6 +230,8 @@ export async function POST(request: Request) {
             experimental_transform: smoothStream({ chunking: 'word' }),
             tools: {
               getWeather,
+              composioSearch,
+              textToPdf,
               createDocument: createDocument({ session, dataStream }),
               updateDocument: updateDocument({ session, dataStream }),
               requestSuggestions: requestSuggestions({
