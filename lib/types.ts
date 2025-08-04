@@ -42,6 +42,8 @@ export type CustomUIDataTypes = {
   kind: ArtifactKind;
   clear: null;
   finish: null;
+  'agent-step': import('./ai/multi-agent/types').AgentStep;
+  'agent-handoff': import('./ai/multi-agent/types').AgentHandoff;
 };
 
 export type ChatMessage = UIMessage<
